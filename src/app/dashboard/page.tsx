@@ -4,6 +4,9 @@
 import { useState, useEffect } from "react";
 import { Chart, registerables } from "chart.js";
 import { Bar, Pie, Line } from "react-chartjs-2";
+import { saveAs } from "file-saver";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 Chart.register(...registerables);
 
@@ -82,6 +85,44 @@ export default function Dashboard() {
       updated[index].payoutRate = value;
       return updated;
     });
+  };
+
+  const exportToCSV = () => {
+    const rows = news.map((article) => [
+      article.title || "",
+      article.author || "",
+      article.description || "",
+      article.publishedAt || "",
+      article.url || "",
+    ]);
+
+    const csvContent = [
+      ["Title", "Author", "Description", "Published At", "URL"],
+      ...rows,
+    ]
+      .map((row) => row.join(","))
+      .join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    saveAs(blob, "articles.csv");
+  };
+
+  const exportToPDF = () => {
+    const doc = new jsPDF();
+    doc.text("Articles Report", 14, 16);
+
+    autoTable(doc, {
+      head: [["Title", "Author", "Description", "Published At", "URL"]],
+      body: news.map((article) => [
+        article.title || "",
+        article.author || "",
+        article.description || "",
+        article.publishedAt || "",
+        article.url || "",
+      ]),
+    });
+
+    doc.save("articles.pdf");
   };
 
   const authorChartData = {
@@ -266,6 +307,21 @@ export default function Dashboard() {
           </tbody>
         </table>
       </div>
+      <div className="flex gap-4 mt-6">
+  <button
+    onClick={exportToCSV}
+    className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
+  >
+    Export CSV
+  </button>
+  <button
+    onClick={exportToPDF}
+    className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
+  >
+    Export PDF
+  </button>
+</div>
+
     </div>
   );
 }
