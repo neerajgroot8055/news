@@ -1,4 +1,4 @@
-// app/dashboard/page.tsx
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -15,6 +15,12 @@ type Article = {
   url?: string;
 };
 
+type AuthorPayout = {
+  author: string;
+  articles: number;
+  payoutRate: number;
+};
+
 export default function Dashboard() {
   const [news, setNews] = useState<Article[]>([]);
   const [searchKeyword, setSearchKeyword] = useState("");
@@ -26,6 +32,7 @@ export default function Dashboard() {
 
   const [authorCounts, setAuthorCounts] = useState<{ [key: string]: number }>({});
   const [typeCounts, setTypeCounts] = useState<{ [key: string]: number }>({});
+  const [payouts, setPayouts] = useState<AuthorPayout[]>([]);
 
   const fetchNews = async (query: string = "") => {
     try {
@@ -52,6 +59,13 @@ export default function Dashboard() {
 
     setAuthorCounts(authorCount);
     setTypeCounts(typeCount);
+
+    const payoutsData = Object.keys(authorCount).map((author) => ({
+      author,
+      articles: authorCount[author],
+      payoutRate: 10, 
+    }));
+    setPayouts(payoutsData);
   };
 
   useEffect(() => {
@@ -60,6 +74,14 @@ export default function Dashboard() {
 
   const handleSearch = () => {
     fetchNews(searchKeyword);
+  };
+
+  const handlePayoutChange = (index: number, value: number) => {
+    setPayouts((prev) => {
+      const updated = [...prev];
+      updated[index].payoutRate = value;
+      return updated;
+    });
   };
 
   const authorChartData = {
@@ -104,7 +126,7 @@ export default function Dashboard() {
         The News App
       </h1>
 
-      {/* Search Bar */}
+      
       <div className="flex items-center justify-between mb-4">
         <input
           type="text"
@@ -121,7 +143,7 @@ export default function Dashboard() {
         </button>
       </div>
 
-      {/* Filters */}
+    
       <div className="flex flex-wrap gap-4 mb-4">
         <input
           type="text"
@@ -169,7 +191,7 @@ export default function Dashboard() {
         </select>
       </div>
 
-      {/* News Section */}
+      
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {news.map((article, index) => (
           <div
@@ -200,7 +222,7 @@ export default function Dashboard() {
         ))}
       </div>
 
-      {/* Charts Section */}
+    
       <div className="mt-8">
         <h2 className="text-2xl font-bold mb-4">Article Trends</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -211,6 +233,38 @@ export default function Dashboard() {
             <Pie data={typeChartData} />
           </div>
         </div>
+      </div>
+
+     
+      <div className="mt-8">
+        <h2 className="text-2xl font-bold mb-4">Author Payouts</h2>
+        <table className="table-auto w-full bg-gray-700 rounded-lg">
+          <thead>
+            <tr>
+              <th className="px-4 py-2 text-left">Author</th>
+              <th className="px-4 py-2 text-left">Articles</th>
+              <th className="px-4 py-2 text-left">Payout Rate</th>
+            </tr>
+          </thead>
+          <tbody>
+            {payouts.map((payout, index) => (
+              <tr key={index} className="border-t border-gray-600">
+                <td className="px-4 py-2">{payout.author}</td>
+                <td className="px-4 py-2">{payout.articles}</td>
+                <td className="px-4 py-2">
+                  <input
+                    type="number"
+                    value={payout.payoutRate}
+                    onChange={(e) =>
+                      handlePayoutChange(index, parseFloat(e.target.value))
+                    }
+                    className="w-20 p-1 bg-gray-600 border border-gray-500 rounded text-white focus:outline-none focus:ring focus:ring-blue-500"
+                  />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );
