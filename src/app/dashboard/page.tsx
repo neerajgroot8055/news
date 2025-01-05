@@ -2,6 +2,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { Chart, registerables } from "chart.js";
+import { Bar, Pie, Line } from "react-chartjs-2";
+
+Chart.register(...registerables);
 
 type Article = {
   title?: string;
@@ -20,24 +24,78 @@ export default function Dashboard() {
     type: "",
   });
 
-  
+  const [authorCounts, setAuthorCounts] = useState<{ [key: string]: number }>({});
+  const [typeCounts, setTypeCounts] = useState<{ [key: string]: number }>({});
+
   const fetchNews = async (query: string = "") => {
     try {
       const response = await fetch(`/api/news?search=${query || "latest"}`);
       const data: Article[] = await response.json();
       setNews(data);
+      calculateTrends(data);
     } catch (error) {
       console.error("Failed to fetch news:", error);
     }
   };
 
- 
+  const calculateTrends = (articles: Article[]) => {
+    const authorCount: { [key: string]: number } = {};
+    const typeCount: { [key: string]: number } = {};
+
+    articles.forEach((article) => {
+      const author = article.author || "Unknown Author";
+      authorCount[author] = (authorCount[author] || 0) + 1;
+
+      const type = filters.type || "General";
+      typeCount[type] = (typeCount[type] || 0) + 1;
+    });
+
+    setAuthorCounts(authorCount);
+    setTypeCounts(typeCount);
+  };
+
   useEffect(() => {
     fetchNews("BBC Sports");
   }, []);
 
   const handleSearch = () => {
-    fetchNews(searchKeyword); 
+    fetchNews(searchKeyword);
+  };
+
+  const authorChartData = {
+    labels: Object.keys(authorCounts),
+    datasets: [
+      {
+        label: "Articles by Author",
+        data: Object.values(authorCounts),
+        backgroundColor: "rgba(75, 192, 192, 0.6)",
+        borderColor: "rgba(75, 192, 192, 1)",
+        borderWidth: 1,
+      },
+    ],
+  };
+
+  const typeChartData = {
+    labels: Object.keys(typeCounts),
+    datasets: [
+      {
+        label: "Articles by Type",
+        data: Object.values(typeCounts),
+        backgroundColor: [
+          "rgba(153, 102, 255, 0.6)",
+          "rgba(255, 159, 64, 0.6)",
+          "rgba(75, 192, 192, 0.6)",
+          "rgba(255, 205, 86, 0.6)",
+        ],
+        borderColor: [
+          "rgba(153, 102, 255, 1)",
+          "rgba(255, 159, 64, 1)",
+          "rgba(75, 192, 192, 1)",
+          "rgba(255, 205, 86, 1)",
+        ],
+        borderWidth: 1,
+      },
+    ],
   };
 
   return (
@@ -45,6 +103,7 @@ export default function Dashboard() {
       <h1 className="text-3xl font-bold text-center mb-6 text-blue-400">
         The News App
       </h1>
+
       {/* Search Bar */}
       <div className="flex items-center justify-between mb-4">
         <input
@@ -139,6 +198,19 @@ export default function Dashboard() {
             </a>
           </div>
         ))}
+      </div>
+
+      {/* Charts Section */}
+      <div className="mt-8">
+        <h2 className="text-2xl font-bold mb-4">Article Trends</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="bg-gray-700 p-4 rounded-lg">
+            <Bar data={authorChartData} />
+          </div>
+          <div className="bg-gray-700 p-4 rounded-lg">
+            <Pie data={typeChartData} />
+          </div>
+        </div>
       </div>
     </div>
   );
