@@ -25,6 +25,7 @@ type AuthorPayout = {
 };
 
 export default function Dashboard() {
+  const [darkMode, setDarkMode] = useState(false);
   const [news, setNews] = useState<Article[]>([]);
   const [searchKeyword, setSearchKeyword] = useState("");
   const [filters, setFilters] = useState({
@@ -162,10 +163,21 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="h-screen bg-gray-800 p-4 text-white">
-      <h1 className="text-3xl font-bold text-center mb-6 text-blue-400">
-        The News App
-      </h1>
+    <div
+    className={`h-screen p-4 ${
+      darkMode ? "bg-black text-white" : "bg-white text-black"
+    }`}
+  >
+    <div className="flex justify-between items-center mb-4">
+      <h1 className="text-3xl font-bold text-center">The News App</h1>
+      <button
+        onClick={() => setDarkMode(!darkMode)}
+        className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-800"
+      >
+        Toggle {darkMode ? "Light" : "Dark"} Mode
+      </button>
+    </div>
+
 
       
       <div className="flex items-center justify-between mb-4">
