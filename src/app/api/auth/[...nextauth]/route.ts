@@ -14,7 +14,7 @@ const handler = NextAuth({
     }),
   ],
   pages: {
-    signIn: "/", // Redirect to the login page if not logged in
+    signIn: "/", 
   },
 });
 

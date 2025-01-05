@@ -20,7 +20,7 @@ export default function Dashboard() {
     type: "",
   });
 
-  // Fetch news articles from the backend (News API)
+  
   const fetchNews = async (query: string = "") => {
     try {
       const response = await fetch(`/api/news?search=${query || "latest"}`);
@@ -31,17 +31,20 @@ export default function Dashboard() {
     }
   };
 
-  // Fetch news on component mount with useEffect
+ 
   useEffect(() => {
-    fetchNews(); // Fetch default news on load
+    fetchNews("BBC Sports");
   }, []);
 
   const handleSearch = () => {
-    fetchNews(searchKeyword); // Fetch news based on search term
+    fetchNews(searchKeyword); 
   };
 
   return (
     <div className="h-screen bg-gray-800 p-4 text-white">
+      <h1 className="text-3xl font-bold text-center mb-6 text-blue-400">
+        The News App
+      </h1>
       {/* Search Bar */}
       <div className="flex items-center justify-between mb-4">
         <input
